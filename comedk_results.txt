@@ -1,0 +1,28 @@
+COMEDK Engineering Admission Results
+==================================
+Generated on: 11/05/25 22:13:30
+
+Student Details and Allotment Results
+------------------------------------
+
+Registration Number: DC101
+Name: A
+Rank: 2
+Personal Details:
+  - Date of Birth: 01-01-2006
+  - Phone: 9999999991
+Academic Records:
+  - 10th Percentage: 90.00%
+  - 12th Percentage: 90.00%
+
+Preferences:
+  1. RVCE Bangalore - CSE
+  2. RVCE Bangalore - ECE
+  3. BMSCE Bangalore - CSE
+
+ALLOTMENT RESULT:
+College: RVCE Bangalore
+Branch: CSE
+
+--------------------------------------------------
+
