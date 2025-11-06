@@ -99,6 +99,7 @@ void initializeColleges(int totalStudents) {
 }
 
 void displayMenu() {
+    printf("\n\nWELCOME!!!\n");
     printf("\n%sCOMEDK Admission Automation System%s\n", COLOR_GREEN, COLOR_RESET);
     printf("=================================\n");
     printf("1. Add New Student\n");

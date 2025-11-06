@@ -260,15 +260,18 @@ void addNewStudent(Queue* q, int* student_count, int totalStudents) {
     newStudent->rank = rank;
     
     if (verifyStudent(newStudent)) {
-        inputPreferences(newStudent);
-        strcpy(newStudent->allocated_college, "Not Allocated");
-        strcpy(newStudent->allocated_branch, "NA");
-        enqueue(q, newStudent);
-        (*student_count)++;
-        printf("\n%sStudent added successfully!%s\n", COLOR_GREEN, COLOR_RESET);
-    } else {
-        free(newStudent);
-    }
+    newStudent->verified = true;   // <-- ADD THIS LINE
+    inputPreferences(newStudent);
+    strcpy(newStudent->allocated_college, "Not Allocated");
+    strcpy(newStudent->allocated_branch, "NA");
+    enqueue(q, newStudent);
+    (*student_count)++;
+    printf("\n%sStudent added successfully!%s\n", COLOR_GREEN, COLOR_RESET);
+} else {
+    newStudent->verified = false;  // <-- OPTIONAL, for clarity
+    free(newStudent);
+}
+
 }
 
 void displaySystemStatus(Queue* q) {
