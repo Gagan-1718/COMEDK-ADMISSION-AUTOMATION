@@ -3,7 +3,30 @@
 
 #include <stdbool.h>
 
+// Constants
+#define MAX_COLLEGES 4
+#define MAX_PREFERENCES 3
+#define MAX_NAME_LENGTH 50
+#define MAX_REG_LENGTH 10
+#define MAX_VERIFICATION_DATA 100
+
 // ANSI color codes
+#define COLOR_RED     "\x1b[31m"
+#define COLOR_GREEN   "\x1b[32m"
+#define COLOR_YELLOW  "\x1b[33m"
+#define COLOR_BLUE    "\x1b[34m"
+#define COLOR_RESET   "\x1b[0m"
+
+// Structure for verification data
+typedef struct {
+    char reg_number[MAX_REG_LENGTH];
+    char name[MAX_NAME_LENGTH];
+    char dob[15];
+    char aadhar[15];
+} StudentData;
+
+extern StudentData verificationData[MAX_VERIFICATION_DATA];
+extern int verificationDataCount;
 #define COLOR_RED     "\x1b[31m"
 #define COLOR_GREEN   "\x1b[32m"
 #define COLOR_YELLOW  "\x1b[33m"
@@ -84,9 +107,11 @@ Queue* createQueue(void);
 void enqueue(Queue* q, Student* newStudent);
 void displayStudents(Student* head);
 bool verifyStudent(Student* student);
+bool addToVerificationData(const char* reg_number, const char* name, const char* dob, const char* aadhar);
 void inputPreferences(Student* student);
 void displayColleges(void);
 void processAllocation(Queue* q);
-void displaySystemStatus(Queue* q);  // New function to show internal state
+void displaySystemStatus(Queue* q);
+void updateStudentPreferences(Queue* q);  // New function for updating preferences
 
 #endif

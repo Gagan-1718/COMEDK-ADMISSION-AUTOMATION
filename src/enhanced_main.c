@@ -29,6 +29,20 @@ int main(int argc, char *argv[]) {
     int choice;
     int student_count = 0;
     
+    // Register initial verification data students
+    for (int i = 0; i < 5; i++) {
+        Student* newStudent = (Student*)malloc(sizeof(Student));
+        strcpy(newStudent->reg_number, verificationData[i].reg_number);
+        strcpy(newStudent->name, verificationData[i].name);
+        newStudent->rank = (i + 1) *1;  // Assign ranks 100, 200, 300, 400, 500
+        newStudent->verified = true;
+        newStudent->num_preferences = 0;
+        strcpy(newStudent->allocated_college, "Not Allocated");
+        strcpy(newStudent->allocated_branch, "NA");
+        enqueue(studentQueue, newStudent);
+        student_count++;
+    }
+    
     while (1) {
         displayMenu();
         int scanResult = scanf("%d", &choice);
@@ -58,10 +72,14 @@ int main(int argc, char *argv[]) {
                 processAllocation(studentQueue);
                 break;
             case 5:
+                updateStudentPreferences(studentQueue);
+                break;
+            case 6:
                 printf("\n%sThank you for using COMEDK Admission System!%s\n", COLOR_GREEN, COLOR_RESET);
+                printf("%sHave a great day!%s\n\n", COLOR_YELLOW, COLOR_RESET);
                 return 0;
             default:
-                printf("\n%sInvalid choice! Please try again.%s\n", COLOR_RED, COLOR_RESET);
+                printf("\n%sInvalid choice! Please enter a number between 1 and 6.%s\n", COLOR_RED, COLOR_RESET);
         }
     }
     
@@ -99,13 +117,17 @@ void initializeColleges(int totalStudents) {
 }
 
 void displayMenu() {
-    printf("\n\nWELCOME!!!\n");
-    printf("\n%sCOMEDK Admission Automation System%s\n", COLOR_GREEN, COLOR_RESET);
-    printf("=================================\n");
-    printf("1. Add New Student\n");
-    printf("2. View All Students\n");
-    printf("3. View All Colleges\n");
+    printf("\n\n%s************************************%s\n", COLOR_YELLOW, COLOR_RESET);
+    printf("%s        WELCOME TO COMEDK         %s\n", COLOR_GREEN, COLOR_RESET);
+    printf("%s     Admission Automation System   %s\n", COLOR_GREEN, COLOR_RESET);
+    printf("%s************************************%s\n\n", COLOR_YELLOW, COLOR_RESET);
+    printf("%sAvailable Options:%s\n", COLOR_BLUE, COLOR_RESET);
+    printf("=================\n");
+    printf("1. Add New Student Registration\n");
+    printf("2. View All Registered Students\n");
+    printf("3. View All Available Colleges\n");
     printf("4. Process Seat Allotment\n");
-    printf("5. Exit\n");
-    printf("Enter your choice: ");
+    printf("5. Update Student Preferences\n");
+    printf("6. Exit\n\n");
+    printf("Please enter your choice (1-6): ");
 }

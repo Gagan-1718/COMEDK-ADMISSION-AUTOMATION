@@ -240,38 +240,171 @@ void processAllocation(Queue* q) {
 
 void addNewStudent(Queue* q, int* student_count, int totalStudents) {
     Student* newStudent = (Student*)malloc(sizeof(Student));
-    printf("\n%sEnter Student Details%s\n", COLOR_YELLOW, COLOR_RESET);
-    printf("=====================\n");
+    printf("\n%s=== New Student Registration ===%s\n", COLOR_YELLOW, COLOR_RESET);
+    printf("%sPlease enter the following details carefully%s\n\n", COLOR_BLUE, COLOR_RESET);
     
-    printf("Enter Registration Number (e.g., DC101): ");
-    scanf("%s", newStudent->reg_number);
+    printf("1. Registration Number Format: DCXXX (e.g., DC101)\n");
+    printf("2. Name: Maximum %d characters\n", MAX_NAME_LENGTH - 1);
+    printf("3. Rank: Must be a unique number\n");
+    printf("4. Date of Birth Format: DD-MM-YYYY\n");
+    printf("5. Aadhar Format: XXXX-XXXX-XXXX\n\n");
     
-    printf("Enter Name: ");
-    scanf("%s", newStudent->name);
+    char dob[15];
+    char aadhar[15];
+    
+    while (1) {
+        printf("Enter Registration Number: ");
+        scanf("%s", newStudent->reg_number);
+        if (strlen(newStudent->reg_number) > MAX_REG_LENGTH - 1) {
+            printf("%sError: Registration number too long!%s\n", COLOR_RED, COLOR_RESET);
+            continue;
+        }
+        break;
+    }
+    
+    while (getchar() != '\n');  // Clear input buffer
+    printf("Enter Student Name: ");
+    fgets(newStudent->name, MAX_NAME_LENGTH, stdin);
+    newStudent->name[strcspn(newStudent->name, "\n")] = 0;  // Remove newline
     
     int rank;
-    do {
-        printf("Enter Rank: ");
-        scanf("%d", &rank);
-        if (searchBST(q->rank_tree, rank) != NULL) {
-            printf("%sRank %d is already taken!%s\n", COLOR_RED, rank, COLOR_RESET);
+    while (1) {
+        printf("Enter Rank (1 or higher): ");
+        if (scanf("%d", &rank) != 1 || rank < 1) {
+            printf("%sError: Please enter a valid rank number!%s\n", COLOR_RED, COLOR_RESET);
+            while (getchar() != '\n');  // Clear input buffer
+            continue;
         }
-    } while (searchBST(q->rank_tree, rank) != NULL);
+        if (searchBST(q->rank_tree, rank) != NULL) {
+            printf("%sError: Rank %d is already taken!%s\n", COLOR_RED, rank, COLOR_RESET);
+            continue;
+        }
+        break;
+    }
     newStudent->rank = rank;
     
-    if (verifyStudent(newStudent)) {
-    newStudent->verified = true;   // <-- ADD THIS LINE
+    while (getchar() != '\n');  // Clear input buffer
+    
+    // Get DOB
+    printf("Enter Date of Birth (DD-MM-YYYY): ");
+    scanf("%s", dob);
+    
+    // Get Aadhar
+    printf("Enter Aadhar Number (XXXX-XXXX-XXXX): ");
+    scanf("%s", aadhar);
+    
+    // Add to verification data
+    if (!addToVerificationData(newStudent->reg_number, newStudent->name, dob, aadhar)) {
+        printf("\n%sError: Could not add to verification data. Maximum limit reached.%s\n", COLOR_RED, COLOR_RESET);
+        free(newStudent);
+        return;
+    }
+
+    // Set as verified and continue with preferences
+    newStudent->verified = true;
     inputPreferences(newStudent);
     strcpy(newStudent->allocated_college, "Not Allocated");
     strcpy(newStudent->allocated_branch, "NA");
     enqueue(q, newStudent);
     (*student_count)++;
     printf("\n%sStudent added successfully!%s\n", COLOR_GREEN, COLOR_RESET);
-} else {
-    newStudent->verified = false;  // <-- OPTIONAL, for clarity
-    free(newStudent);
+
 }
 
+void updateStudentPreferences(Queue* q) {
+    printf("\n%s=== Update Student Preferences ===%s\n", COLOR_YELLOW, COLOR_RESET);
+    printf("%sPlease verify your identity%s\n\n", COLOR_BLUE, COLOR_RESET);
+    
+    char reg_number[MAX_REG_LENGTH];
+    printf("Enter Registration Number: ");
+    scanf("%s", reg_number);
+    
+    // Find student in queue
+    Student* current = q->front;
+    Student* found_student = NULL;
+    
+    while (current != NULL) {
+        if (strcmp(current->reg_number, reg_number) == 0) {
+            found_student = current;
+            break;
+        }
+        current = current->next;
+    }
+    
+    if (!found_student) {
+        printf("\n%sError: Student with registration number %s not found!%s\n", 
+               COLOR_RED, reg_number, COLOR_RESET);
+        return;
+    }
+    
+    // Find verification data
+    bool found_verification = false;
+    StudentData* vData = NULL;
+    for (int i = 0; i < verificationDataCount; i++) {
+        if (strcmp(reg_number, verificationData[i].reg_number) == 0) {
+            vData = &verificationData[i];
+            found_verification = true;
+            break;
+        }
+    }
+    
+    if (!found_verification) {
+        printf("%sError: Verification data not found!%s\n", COLOR_RED, COLOR_RESET);
+        return;
+    }
+    
+    // Verify student
+    printf("Enter Date of Birth (DD-MM-YYYY): ");
+    char dob[15];
+    scanf("%s", dob);
+    if (strcmp(dob, vData->dob) != 0) {
+        printf("%sVerification Failed! Invalid Date of Birth.%s\n", COLOR_RED, COLOR_RESET);
+        return;
+    }
+    
+    printf("Enter Aadhar Number (XXXX-XXXX-XXXX): ");
+    char aadhar[15];
+    scanf("%s", aadhar);
+    if (strcmp(aadhar, vData->aadhar) != 0) {
+        printf("%sVerification Failed! Invalid Aadhar Number.%s\n", COLOR_RED, COLOR_RESET);
+        return;
+    }
+    
+    // Display current student info
+    printf("\n%sStudent Information:%s\n", COLOR_GREEN, COLOR_RESET);
+    printf("Name: %s\n", found_student->name);
+    printf("Rank: %d\n", found_student->rank);
+    
+    // Display current preferences if any
+    if (found_student->num_preferences > 0) {
+        printf("\nCurrent Preferences:\n");
+        for (int i = 0; i < found_student->num_preferences; i++) {
+            printf("%d. %s - %s\n", 
+                   i + 1,
+                   colleges[found_student->preferences[i].college_index].name,
+                   found_student->preferences[i].branch);
+        }
+    }
+    
+    // Ask if user wants to update preferences
+    printf("\nDo you want to update your preferences? (y/n): ");
+    char choice;
+    while (getchar() != '\n');  // Clear input buffer
+    scanf("%c", &choice);
+    
+    if (choice == 'y' || choice == 'Y') {
+        // Reset preferences and input new ones
+        found_student->num_preferences = 0;
+        inputPreferences(found_student);
+        printf("\n%sPreferences updated successfully!%s\n", COLOR_GREEN, COLOR_RESET);
+        
+        // Log the operation
+        char operation[100];
+        sprintf(operation, "Updated preferences for student %s", found_student->reg_number);
+        pushOperation(q->operation_log, operation);
+    } else {
+        printf("\n%sPreferences update cancelled.%s\n", COLOR_YELLOW, COLOR_RESET);
+    }
 }
 
 void displaySystemStatus(Queue* q) {
